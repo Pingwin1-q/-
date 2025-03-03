@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информационные системы</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            cursor: pointer; /* Показывает, что ячейка кликабельна */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .details-row {
+            display: none; /* Скрываем строку с деталями по умолчанию */
+        }
+        .details-row td {
+            background-color: #f9f9f9; /* Фон для строки с деталями */
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Информационные системы</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Наименование ИС</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+
+    <script>
+        fetch('systems.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки данных: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Данные успешно загружены:', data); // Отладочный вывод
+                const tableBody = document.getElementById('table-body');
+                if (data.length === 0) {
+                    console.error('Данные пусты!');
+                    return;
+                }
+                data.forEach((system, index) => {
+                    // Создаем строку с наименованием ИС
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.textContent = system.Наименование;
+                    cell.onclick = () => toggleDetails(row, system);
+                    row.appendChild(cell);
+                    tableBody.appendChild(row);
+
+                    // Создаем строку с деталями (скрытую по умолчанию)
+                    const detailsRow = document.createElement('tr');
+                    detailsRow.classList.add('details-row');
+                    const detailsCell = document.createElement('td');
+                    detailsCell.colSpan = 1; // На всю ширину таблицы
+                    detailsCell.innerHTML = `
+                        <strong>Протестировано:</strong> ${system.Протестировано || 'Нет данных'}<br>
+                        <strong>Работает:</strong> ${system.Работает || 'Нет данных'}
+                    `;
+                    detailsRow.appendChild(detailsCell);
+                    tableBody.appendChild(detailsRow);
+                });
+            })
+            .catch(error => console.error('Ошибка:', error));
+
+        // Функция для переключения видимости строки с деталями
+        function toggleDetails(row, system) {
+            const nextRow = row.nextElementSibling; // Следующая строка (с деталями)
+            if (nextRow && nextRow.classList.contains('details-row')) {
+                // Переключаем видимость строки с деталями
+                if (nextRow.style.display === 'none' || nextRow.style.display === '') {
+                    nextRow.style.display = 'table-row';
+                } else {
+                    nextRow.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
